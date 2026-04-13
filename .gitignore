@@ -1,2 +1,4 @@
 /website/.vscode
 /website/node_modules
+/website/dist
+*.Identifier
