@@ -1,0 +1,75 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install and build website
+        working-directory: website
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website-dist
+          path: website/dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-website
+    steps:
+      - name: Validate Environment Vars
+        run: |
+          missing=0
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then echo "::error::Missing secret AWS_ROLE_ARN"; missing=1; fi
+          if [ -z "${{ vars.AWS_REGION }}" ]; then echo "::error::Missing variable AWS_REGION"; missing=1; fi
+          if [ "$missing" -eq 1 ]; then exit 1; fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cdk/package-lock.json
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: website-dist
+          path: website/dist
+
+      - name: Install CDK dependencies
+        working-directory: cdk
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: CDK deploy
+        working-directory: cdk
+        run: npx cdk deploy --require-approval never --outputs-file outputs.json
+
+      - name: Print website URL
+        working-directory: cdk
+        run: cat outputs.json
