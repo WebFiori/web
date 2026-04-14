@@ -87,6 +87,26 @@ watch(contentEl, () => nextTick(highlightAndAddCopyButtons))
       <!-- Content -->
       <v-col cols="12" md="9">
         <v-card v-if="doc" variant="flat">
+          <div class="d-flex justify-end px-4 pt-3 ga-1">
+            <v-btn
+              :href="`https://github.com/WebFiori/docs/blob/main/${slug}.md`"
+              target="_blank"
+              variant="text"
+              size="small"
+              prepend-icon="mdi-file-document-outline"
+            >
+              View source
+            </v-btn>
+            <v-btn
+              :href="`https://github.com/WebFiori/docs/edit/main/${slug}.md`"
+              target="_blank"
+              variant="text"
+              size="small"
+              prepend-icon="mdi-pencil"
+            >
+              Edit this page
+            </v-btn>
+          </div>
           <v-card-text ref="contentEl" class="doc-content" v-html="doc.html" />
         </v-card>
         <v-alert v-else type="warning" variant="tonal">
