@@ -2,3 +2,4 @@
 /website/node_modules
 /website/dist
 *.Identifier
+/website/docs-content

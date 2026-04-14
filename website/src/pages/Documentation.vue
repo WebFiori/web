@@ -1,4 +1,37 @@
 <script setup lang="ts">
+import docs from 'virtual:docs'
+
+const slugMap: Record<string, string> = {
+  'Introduction': 'introduction',
+  'Installation': 'installation',
+  'Folder Structure': 'folder-structure',
+  'Basic Usage': 'basic-usage',
+  'Routing': 'routing',
+  'The Class Response': 'class-response',
+  'Web Pages': 'web-pages',
+  'Web Services': 'web-services',
+  'Middleware': 'middleware',
+  'UI Package': 'ui-package',
+  'Themes': 'themes',
+  'Internationalization': 'i18n',
+  'Database Management': 'database',
+  'Migrations and Seeders': 'migrations',
+  'Sessions Management': 'sessions-management',
+  'WebFiori JSON': 'webfiori-json',
+  'Uploading Files': 'uploading-files',
+  'MVC Architecture': 'mvc',
+  'Sending Emails': 'sending-emails',
+  'Background Tasks': 'background-tasks',
+  'Command Line Interface': 'command-line-interface',
+  'Environment Variables': 'env-vars',
+  'Coding Standards': 'coding-standards',
+}
+
+function docLink(title: string): string | undefined {
+  const slug = slugMap[title]
+  return slug && docs[slug] ? `/docs/${slug}` : undefined
+}
+
 const sections = [
   {
     category: 'Getting Started',
@@ -61,17 +94,11 @@ const sections = [
     <h1 class="text-h3 font-weight-bold mb-2">Documentation</h1>
     <p class="text-medium-emphasis mb-8">Comprehensive guides covering every aspect of the framework.</p>
 
-    <v-alert type="info" variant="tonal" class="mb-8">
-      Full documentation with code examples is available on the
-      <a href="https://github.com/WebFiori/docs" target="_blank" class="text-primary">docs repository</a>
-      and at <a href="https://webfiori.com/learn" target="_blank" class="text-primary">webfiori.com/learn</a>.
-    </v-alert>
-
     <div v-for="section in sections" :key="section.category" class="mb-8">
       <h2 class="text-h5 font-weight-bold mb-4">{{ section.category }}</h2>
       <v-row>
         <v-col v-for="item in section.items" :key="item.title" cols="12" sm="6" md="4">
-          <v-card height="100%" variant="outlined" class="pa-3">
+          <v-card height="100%" variant="outlined" class="pa-3" :to="docLink(item.title)" :href="docLink(item.title) ? undefined : '#'">
             <v-icon :icon="item.icon" color="primary" class="mb-2" />
             <v-card-title class="px-0 text-wrap text-body-1 font-weight-bold">{{ item.title }}</v-card-title>
             <v-card-text class="px-0 text-body-2">{{ item.desc }}</v-card-text>
