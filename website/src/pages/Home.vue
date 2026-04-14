@@ -5,7 +5,6 @@ import AuroraBackground from '../components/magic/AuroraBackground.vue'
 import TypingText from '../components/magic/TypingText.vue'
 import FadeIn from '../components/magic/FadeIn.vue'
 import ShimmerBorder from '../components/magic/ShimmerBorder.vue'
-import AnimatedCounter from '../components/magic/AnimatedCounter.vue'
 import DotGrid from '../components/magic/DotGrid.vue'
 
 const features = [
@@ -82,22 +81,6 @@ const typingDone = ref(false)
         </v-container>
       </v-container>
     </div>
-
-    <!-- Stats counters -->
-    <v-container class="py-10">
-      <FadeIn>
-        <v-row justify="center" class="text-center">
-          <v-col cols="6" sm="4">
-            <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="6" suffix="+" /></div>
-            <div class="text-body-2 text-medium-emphasis">PHP Versions Supported</div>
-          </v-col>
-          <v-col cols="6" sm="4">
-            <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="100" suffix="%" /></div>
-            <div class="text-body-2 text-medium-emphasis">Open Source</div>
-          </v-col>
-        </v-row>
-      </FadeIn>
-    </v-container>
 
     <!-- Quick install with shimmer -->
     <v-container class="py-12">

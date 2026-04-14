@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-markup'
@@ -14,23 +14,52 @@ const slug = computed(() => route.params.slug as string)
 const doc = computed(() => docs[slug.value])
 const contentEl = ref<any>()
 const activeHeading = ref('')
+const mobileTocOpen = ref(false)
 
+// #1 — Grouped sidebar
+const sidebarGroups = [
+  { category: 'Getting Started', slugs: ['introduction', 'installation', 'folder-structure', 'basic-usage'] },
+  { category: 'Core Features', slugs: ['routing', 'class-response', 'web-pages', 'web-services', 'middleware'] },
+  { category: 'User Interface', slugs: ['ui-package', 'themes', 'i18n'] },
+  { category: 'Data & Storage', slugs: ['database', 'migrations', 'sessions-management', 'webfiori-json', 'uploading-files'] },
+  { category: 'Advanced', slugs: ['mvc', 'sending-emails', 'background-tasks', 'command-line-interface'] },
+  { category: 'Configuration', slugs: ['env-vars', 'coding-standards'] },
+]
+
+const groupedSidebar = computed(() =>
+  sidebarGroups
+    .map(g => ({
+      category: g.category,
+      items: g.slugs.filter(s => docs[s]).map(s => ({ slug: s, title: docs[s].title })),
+    }))
+    .filter(g => g.items.length)
+)
+
+// Flat ordered list for prev/next
+const allDocs = computed(() => groupedSidebar.value.flatMap(g => g.items))
+const currentIndex = computed(() => allDocs.value.findIndex(d => d.slug === slug.value))
+const prevDoc = computed(() => currentIndex.value > 0 ? allDocs.value[currentIndex.value - 1] : null)
+const nextDoc = computed(() => currentIndex.value < allDocs.value.length - 1 ? allDocs.value[currentIndex.value + 1] : null)
+
+// #12 — Last updated
+const lastUpdatedFormatted = computed(() => {
+  if (!doc.value?.lastUpdated) return ''
+  return new Date(doc.value.lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+})
+
+// TOC observer
 let observer: IntersectionObserver | null = null
 
 function observeHeadings() {
   observer?.disconnect()
   const el = contentEl.value?.$el || contentEl.value
   if (!el) return
-
   const headings = el.querySelectorAll('h2[id], h3[id]')
   if (!headings.length) return
-
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        if (entry.isIntersecting) {
-          activeHeading.value = entry.target.id
-        }
+        if (entry.isIntersecting) activeHeading.value = entry.target.id
       }
     },
     { rootMargin: '0px 0px -70% 0px', threshold: 0.1 }
@@ -40,28 +69,18 @@ function observeHeadings() {
 
 onBeforeUnmount(() => observer?.disconnect())
 
-const allDocs = computed(() =>
-  Object.entries(docs)
-    .filter(([k]) => k !== 'index')
-    .map(([k, v]) => ({ slug: k, title: v.title }))
-    .sort((a, b) => a.title.localeCompare(b.title))
-)
-
-const currentIndex = computed(() => allDocs.value.findIndex(d => d.slug === slug.value))
-const prevDoc = computed(() => currentIndex.value > 0 ? allDocs.value[currentIndex.value - 1] : null)
-const nextDoc = computed(() => currentIndex.value < allDocs.value.length - 1 ? allDocs.value[currentIndex.value + 1] : null)
-
 function highlightAndAddCopyButtons() {
   const el = contentEl.value?.$el || contentEl.value
   if (!el || !el.querySelectorAll) return
 
   el.querySelectorAll('pre code').forEach((block: Element) => {
-    // Detect language from class or content
     const classes = block.className || ''
+    const pre = block.parentElement
+    const dataLang = pre?.getAttribute('data-lang') || ''
     let lang = 'markup'
-    if (classes.includes('php') || block.textContent?.includes('<?php') || block.textContent?.includes('namespace ') || block.textContent?.includes('$')) lang = 'php'
-    else if (classes.includes('bash') || classes.includes('shell') || block.textContent?.match(/^\s*(composer |php |cd |npm |git )/m)) lang = 'bash'
-    else if (classes.includes('json') || block.textContent?.trim().startsWith('{')) lang = 'json'
+    if (dataLang === 'php' || classes.includes('php') || block.textContent?.includes('<?php') || block.textContent?.includes('namespace ') || block.textContent?.includes('$')) lang = 'php'
+    else if (dataLang === 'bash' || dataLang === 'shell' || classes.includes('bash') || block.textContent?.match(/^\s*(composer |php |cd |npm |git )/m)) lang = 'bash'
+    else if (dataLang === 'json' || classes.includes('json') || block.textContent?.trim().startsWith('{')) lang = 'json'
     else if (classes.includes('html') || classes.includes('markup')) lang = 'markup'
 
     const grammar = Prism.languages[lang]
@@ -69,8 +88,6 @@ function highlightAndAddCopyButtons() {
       block.innerHTML = Prism.highlight(block.textContent || '', grammar, lang)
     }
 
-    // Add copy button to parent <pre>
-    const pre = block.parentElement
     if (pre && !pre.querySelector('.doc-copy-btn')) {
       pre.style.position = 'relative'
       const btn = document.createElement('button')
@@ -89,8 +106,7 @@ function highlightAndAddCopyButtons() {
   })
 }
 
-watch(slug, () => nextTick(() => { highlightAndAddCopyButtons(); observeHeadings() }), { immediate: true })
-// Also run after initial render
+watch(slug, () => { mobileTocOpen.value = false; nextTick(() => { highlightAndAddCopyButtons(); observeHeadings() }) }, { immediate: true })
 watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHeadings() }))
 </script>
 
@@ -102,14 +118,17 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
         <v-card variant="outlined" class="sticky-sidebar">
           <v-list density="compact" nav>
             <v-list-item to="/docs" title="Overview" prepend-icon="mdi-home" exact />
-            <v-divider class="my-1" />
-            <v-list-item
-              v-for="item in allDocs"
-              :key="item.slug"
-              :to="`/docs/${item.slug}`"
-              :title="item.title"
-              :active="slug === item.slug"
-            />
+            <template v-for="group in groupedSidebar" :key="group.category">
+              <v-divider class="my-1" />
+              <v-list-subheader>{{ group.category }}</v-list-subheader>
+              <v-list-item
+                v-for="item in group.items"
+                :key="item.slug"
+                :to="`/docs/${item.slug}`"
+                :title="item.title"
+                :active="slug === item.slug"
+              />
+            </template>
           </v-list>
         </v-card>
       </v-col>
@@ -117,26 +136,57 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
       <!-- Content -->
       <v-col cols="12" :md="doc?.toc?.length ? 7 : 9">
         <v-card v-if="doc" variant="flat">
-          <div class="d-flex justify-end px-4 pt-3 ga-1">
-            <v-btn
-              :href="`https://github.com/WebFiori/docs/blob/main/${slug}.md`"
-              target="_blank"
-              variant="text"
-              size="small"
-              prepend-icon="mdi-file-document-outline"
-            >
-              View source
-            </v-btn>
-            <v-btn
-              :href="`https://github.com/WebFiori/docs/edit/main/${slug}.md`"
-              target="_blank"
-              variant="text"
-              size="small"
-              prepend-icon="mdi-pencil"
-            >
-              Edit this page
-            </v-btn>
+          <div class="d-flex align-center justify-space-between px-4 pt-3 flex-wrap ga-1">
+            <div v-if="lastUpdatedFormatted" class="text-caption text-medium-emphasis">
+              <v-icon size="14" icon="mdi-clock-outline" class="mr-1" />Last updated {{ lastUpdatedFormatted }}
+            </div>
+            <div class="d-flex ga-1">
+              <v-btn
+                :href="`https://github.com/WebFiori/docs/blob/main/${slug}.md`"
+                target="_blank"
+                variant="text"
+                size="small"
+                prepend-icon="mdi-file-document-outline"
+              >
+                View source
+              </v-btn>
+              <v-btn
+                :href="`https://github.com/WebFiori/docs/edit/main/${slug}.md`"
+                target="_blank"
+                variant="text"
+                size="small"
+                prepend-icon="mdi-pencil"
+              >
+                Edit this page
+              </v-btn>
+            </div>
           </div>
+
+          <!-- Mobile TOC -->
+          <div v-if="doc.toc?.length" class="d-md-none px-4 pt-2">
+            <v-btn
+              variant="tonal"
+              size="small"
+              block
+              prepend-icon="mdi-table-of-contents"
+              @click="mobileTocOpen = !mobileTocOpen"
+            >
+              On this page
+            </v-btn>
+            <nav v-if="mobileTocOpen" class="toc-nav mt-2 mb-2">
+              <a
+                v-for="entry in doc.toc"
+                :key="entry.id"
+                :href="`#${entry.id}`"
+                class="toc-link text-body-2"
+                :class="{ 'toc-h3': entry.level === 3, 'toc-active': activeHeading === entry.id }"
+                @click="mobileTocOpen = false"
+              >
+                {{ entry.title }}
+              </a>
+            </nav>
+          </div>
+
           <v-card-text ref="contentEl" class="doc-content" v-html="doc.html" />
 
           <!-- Prev / Next -->
@@ -168,7 +218,7 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
         </v-alert>
       </v-col>
 
-      <!-- Table of Contents -->
+      <!-- Table of Contents (desktop) -->
       <v-col v-if="doc?.toc?.length" cols="12" md="2" class="d-none d-md-block">
         <div class="sticky-sidebar">
           <div class="text-caption text-medium-emphasis font-weight-bold mb-2">ON THIS PAGE</div>
@@ -215,6 +265,19 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
 }
 .doc-content pre:hover .doc-copy-btn { opacity: 1; }
 
+/* Code language label */
+.code-lang-label {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  pointer-events: none;
+  font-family: inherit;
+}
+
 /* Typography */
 .doc-content h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
 .doc-content h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
@@ -237,9 +300,10 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
 /* Code blocks */
 .doc-content pre {
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.8rem 1rem 1rem;
   overflow-x: auto;
   margin-bottom: 1rem;
+  position: relative;
 }
 .v-theme--dark .doc-content pre { background: #132613; }
 .v-theme--light .doc-content pre { background: #f5f5f5; }

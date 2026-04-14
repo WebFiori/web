@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useTheme } from 'vuetify'
 import { useRoute, useRouter } from 'vue-router'
 import docs from 'virtual:docs'
@@ -10,8 +10,21 @@ const router = useRouter()
 const drawer = ref(false)
 const isDark = ref(true)
 const searchQuery = ref('')
+const searchFieldRef = ref<any>(null)
 
 const isDocsRoute = computed(() => route.path.startsWith('/docs'))
+
+function onKeydown(e: KeyboardEvent) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    if (isDocsRoute.value) {
+      searchFieldRef.value?.focus()
+    }
+  }
+}
+
+onMounted(() => document.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
 const searchResults = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
@@ -74,14 +87,15 @@ const navItems = [
         <!-- Docs search -->
         <div v-if="isDocsRoute" style="position: relative;">
           <v-text-field
+            ref="searchFieldRef"
             v-model="searchQuery"
-            placeholder="Search docs..."
+            placeholder="Search docs... (⌘K)"
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
             density="compact"
             hide-details
             clearable
-            style="width: 220px;"
+            style="width: 240px;"
           />
           <v-menu
             :model-value="!!searchQuery?.trim()"

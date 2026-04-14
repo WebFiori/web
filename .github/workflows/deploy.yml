@@ -24,7 +24,7 @@ jobs:
           cache-dependency-path: website/package-lock.json
 
       - name: Clone docs
-        run: git clone --depth 1 https://github.com/WebFiori/docs.git website/docs-content
+        run: git clone https://github.com/WebFiori/docs.git website/docs-content
 
       - name: Install and build website
         working-directory: website
