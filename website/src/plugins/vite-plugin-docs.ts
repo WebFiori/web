@@ -62,8 +62,9 @@ export default function docsPlugin(docsDir: string): Plugin {
 
         const cleaned = raw.replace(/<meta[^>]*>/g, '')
         const html = md.render(cleaned)
+        const text = cleaned.replace(/^#+\s+/gm, '').replace(/[`*_~\[\]()]/g, '').replace(/\n{2,}/g, '\n').trim()
 
-        docs[slug] = { title, description, html, toc }
+        docs[slug] = { title, description, html, toc, text }
       }
 
       return `export default ${JSON.stringify(docs)}`

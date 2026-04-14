@@ -40,12 +40,16 @@ function observeHeadings() {
 
 onBeforeUnmount(() => observer?.disconnect())
 
-const sidebar = computed(() =>
+const allDocs = computed(() =>
   Object.entries(docs)
     .filter(([k]) => k !== 'index')
     .map(([k, v]) => ({ slug: k, title: v.title }))
     .sort((a, b) => a.title.localeCompare(b.title))
 )
+
+const currentIndex = computed(() => allDocs.value.findIndex(d => d.slug === slug.value))
+const prevDoc = computed(() => currentIndex.value > 0 ? allDocs.value[currentIndex.value - 1] : null)
+const nextDoc = computed(() => currentIndex.value < allDocs.value.length - 1 ? allDocs.value[currentIndex.value + 1] : null)
 
 function highlightAndAddCopyButtons() {
   const el = contentEl.value?.$el || contentEl.value
@@ -100,7 +104,7 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
             <v-list-item to="/docs" title="Overview" prepend-icon="mdi-home" exact />
             <v-divider class="my-1" />
             <v-list-item
-              v-for="item in sidebar"
+              v-for="item in allDocs"
               :key="item.slug"
               :to="`/docs/${item.slug}`"
               :title="item.title"
@@ -134,6 +138,27 @@ watch(contentEl, () => nextTick(() => { highlightAndAddCopyButtons(); observeHea
             </v-btn>
           </div>
           <v-card-text ref="contentEl" class="doc-content" v-html="doc.html" />
+
+          <!-- Prev / Next -->
+          <v-card-actions v-if="prevDoc || nextDoc" class="px-4 pb-4 pt-2">
+            <v-btn
+              v-if="prevDoc"
+              :to="`/docs/${prevDoc.slug}`"
+              variant="tonal"
+              prepend-icon="mdi-arrow-left"
+            >
+              {{ prevDoc.title }}
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              v-if="nextDoc"
+              :to="`/docs/${nextDoc.slug}`"
+              variant="tonal"
+              append-icon="mdi-arrow-right"
+            >
+              {{ nextDoc.title }}
+            </v-btn>
+          </v-card-actions>
         </v-card>
         <v-alert v-else type="warning" variant="tonal">
           Documentation page not found.

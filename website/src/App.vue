@@ -1,10 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { useRoute, useRouter } from 'vue-router'
+import docs from 'virtual:docs'
 
 const theme = useTheme()
+const route = useRoute()
+const router = useRouter()
 const drawer = ref(false)
 const isDark = ref(true)
+const searchQuery = ref('')
+
+const isDocsRoute = computed(() => route.path.startsWith('/docs'))
+
+const searchResults = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return []
+  const results: { slug: string; title: string; snippet: string }[] = []
+  for (const [slug, doc] of Object.entries(docs)) {
+    if (slug === 'index') continue
+    const titleMatch = doc.title.toLowerCase().includes(q)
+    const textIdx = doc.text.toLowerCase().indexOf(q)
+    if (!titleMatch && textIdx === -1) continue
+    let snippet = ''
+    if (textIdx !== -1) {
+      const start = Math.max(0, textIdx - 40)
+      const end = Math.min(doc.text.length, textIdx + q.length + 40)
+      snippet = (start > 0 ? '...' : '') + doc.text.slice(start, end) + (end < doc.text.length ? '...' : '')
+    }
+    results.push({ slug, title: doc.title, snippet })
+    if (results.length >= 10) break
+  }
+  return results
+})
+
+function goToResult(slug: string) {
+  searchQuery.value = ''
+  router.push(`/docs/${slug}`)
+}
 
 function toggleTheme() {
   isDark.value = !isDark.value
@@ -37,6 +70,44 @@ const navItems = [
             {{ item.title }}
           </v-btn>
         </div>
+
+        <!-- Docs search -->
+        <div v-if="isDocsRoute" style="position: relative;">
+          <v-text-field
+            v-model="searchQuery"
+            placeholder="Search docs..."
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            density="compact"
+            hide-details
+            clearable
+            style="width: 220px;"
+          />
+          <v-menu
+            :model-value="!!searchQuery?.trim()"
+            activator="parent"
+            :close-on-content-click="false"
+            location="bottom end"
+            offset="4"
+            max-height="400"
+            width="360"
+          >
+            <v-list v-if="searchResults.length" density="compact">
+              <v-list-item
+                v-for="r in searchResults"
+                :key="r.slug"
+                @click="goToResult(r.slug)"
+              >
+                <v-list-item-title class="text-body-2 font-weight-medium">{{ r.title }}</v-list-item-title>
+                <v-list-item-subtitle v-if="r.snippet" class="text-caption text-truncate">{{ r.snippet }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+            <v-card v-else>
+              <v-card-text class="text-body-2 text-medium-emphasis">No results found.</v-card-text>
+            </v-card>
+          </v-menu>
+        </div>
+
         <v-btn :icon="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" @click="toggleTheme" variant="text" :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'" />
         <v-btn icon="mdi-github" href="https://github.com/WebFiori/framework" target="_blank" variant="text" aria-label="GitHub repository" />
       </template>
@@ -75,3 +146,4 @@ const navItems = [
     </v-footer>
   </v-app>
 </template>
+

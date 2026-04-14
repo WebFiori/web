@@ -1,4 +1,4 @@
 declare module 'virtual:docs' {
-  const docs: Record<string, { title: string; description: string; html: string; toc: { id: string; title: string; level: number }[] }>
+  const docs: Record<string, { title: string; description: string; html: string; toc: { id: string; title: string; level: number }[]; text: string }>
   export default docs
 }
