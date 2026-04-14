@@ -6,7 +6,6 @@ import TypingText from '../components/magic/TypingText.vue'
 import FadeIn from '../components/magic/FadeIn.vue'
 import ShimmerBorder from '../components/magic/ShimmerBorder.vue'
 import AnimatedCounter from '../components/magic/AnimatedCounter.vue'
-import Marquee from '../components/magic/Marquee.vue'
 import DotGrid from '../components/magic/DotGrid.vue'
 
 const features = [
@@ -17,8 +16,6 @@ const features = [
   { icon: 'mdi-email', title: 'Email', desc: 'Send HTML emails with attachments using familiar HTML syntax and SMTP configuration.' },
   { icon: 'mdi-console', title: 'CLI', desc: 'Built-in and custom CLI commands to streamline development workflows.' },
 ]
-
-const libraries = ['HTTP', 'Database', 'CLI', 'UI', 'JSON', 'Collections', 'Mailer', 'Error Handler', 'Cache', 'File']
 
 const codeExamples = [
   { label: 'Route', lang: 'php', code: `Router::page([
@@ -90,19 +87,11 @@ const typingDone = ref(false)
     <v-container class="py-10">
       <FadeIn>
         <v-row justify="center" class="text-center">
-          <v-col cols="6" sm="3">
-            <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="10" suffix="+" /></div>
-            <div class="text-body-2 text-medium-emphasis">Libraries</div>
-          </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="4">
             <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="6" suffix="+" /></div>
             <div class="text-body-2 text-medium-emphasis">PHP Versions Supported</div>
           </v-col>
-          <v-col cols="6" sm="3">
-            <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="20" suffix="+" /></div>
-            <div class="text-body-2 text-medium-emphasis">Built-in Features</div>
-          </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="4">
             <div class="text-h3 font-weight-bold text-primary"><AnimatedCounter :end="100" suffix="%" /></div>
             <div class="text-body-2 text-medium-emphasis">Open Source</div>
           </v-col>
@@ -121,16 +110,6 @@ const typingDone = ref(false)
             <CodeBlock code="composer create-project webfiori/app my-site --prefer-dist" language="bash" />
           </ShimmerBorder>
         </div>
-      </FadeIn>
-    </v-container>
-
-    <!-- Libraries marquee -->
-    <v-container fluid class="py-8">
-      <FadeIn>
-        <div class="text-center mb-6">
-          <h2 class="text-h5 font-weight-bold">Standard Libraries</h2>
-        </div>
-        <Marquee :items="libraries" :speed="25" />
       </FadeIn>
     </v-container>
 

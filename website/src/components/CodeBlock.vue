@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-markup'
 import 'prismjs/components/prism-markup-templating'
@@ -11,16 +11,24 @@ import { useTheme } from 'vuetify'
 const props = withDefaults(defineProps<{ code: string; language?: string }>(), { language: 'php' })
 const theme = useTheme()
 const isDark = computed(() => theme.global.name.value === 'dark')
+const copied = ref(false)
 
 const highlighted = computed(() => {
   const grammar = Prism.languages[props.language]
   if (!grammar) return props.code
   return Prism.highlight(props.code, grammar, props.language)
 })
+
+function copy() {
+  navigator.clipboard.writeText(props.code)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 1500)
+}
 </script>
 
 <template>
-  <v-card :variant="isDark ? 'tonal' : 'outlined'" :class="isDark ? 'prism-dark' : 'prism-light'" class="code-block my-3">
+  <v-card :variant="isDark ? 'tonal' : 'outlined'" :class="isDark ? 'prism-dark' : 'prism-light'" class="code-block my-3" style="position: relative">
+    <v-btn :icon="copied ? 'mdi-check' : 'mdi-content-copy'" size="x-small" variant="text" :color="copied ? 'success' : undefined" style="position: absolute; top: 8px; right: 8px; z-index: 1" :aria-label="copied ? 'Copied' : 'Copy code'" @click="copy" />
     <v-card-text class="pa-4" style="overflow-x: auto">
       <pre class="ma-0"><code :class="`language-${language}`" v-html="highlighted"></code></pre>
     </v-card-text>
