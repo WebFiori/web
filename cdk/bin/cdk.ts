@@ -7,7 +7,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as path from 'path';
 
-const DOMAIN = 'new.webfiori.com';
+const DOMAIN = 'webfiori.com';
 
 const app = new cdk.App();
 const stack = new cdk.Stack(app, 'WebFioriWebsiteProd', {
