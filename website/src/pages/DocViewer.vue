@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
+import { computed, ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-markup'
@@ -30,7 +30,7 @@ const groupedSidebar = computed(() =>
   sidebarGroups
     .map(g => ({
       category: g.category,
-      items: g.slugs.filter(s => docs[s]).map(s => ({ slug: s, title: docs[s].title })),
+      items: g.slugs.filter(s => docs[s]).map(s => ({ slug: s, title: docs[s]!.title })),
     }))
     .filter(g => g.items.length)
 )
