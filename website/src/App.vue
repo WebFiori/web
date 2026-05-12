@@ -57,6 +57,10 @@ function toggleTheme() {
   theme.global.name.value = isDark.value ? 'dark' : 'light'
 }
 
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 const navItems = [
   { title: 'Home', to: '/', icon: 'mdi-home' },
   { title: 'Features', to: '/features', icon: 'mdi-star' },
@@ -137,25 +141,43 @@ const navItems = [
       <router-view />
     </v-main>
 
+    <v-btn
+      icon="mdi-chevron-up"
+      color="primary"
+      style="position: fixed; bottom: 24px; right: 24px; z-index: 99;"
+      elevation="4"
+      @click="scrollToTop"
+      aria-label="Back to top"
+    />
+
     <v-footer class="bg-surface pa-6">
       <v-container>
         <v-row>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
             <div class="text-h6 mb-2">WebFiori Framework</div>
             <div class="text-body-2 text-medium-emphasis">A PHP web development framework. Lightweight, flexible, and developer-friendly.</div>
           </v-col>
-          <v-col cols="12" md="4">
-            <div class="text-subtitle-2 mb-2">Links</div>
-            <div><a href="https://github.com/WebFiori/framework" target="_blank" class="text-primary text-decoration-none">GitHub</a></div>
-            <div><a href="https://packagist.org/packages/webfiori/framework" target="_blank" class="text-primary text-decoration-none">Packagist</a></div>
+          <v-col cols="12" md="3">
+            <div class="text-subtitle-2 mb-2">Navigate</div>
+            <div><router-link to="/docs" class="text-primary text-decoration-none">Documentation</router-link></div>
+            <div><router-link to="/getting-started" class="text-primary text-decoration-none">Getting Started</router-link></div>
+            <div><router-link to="/contributing" class="text-primary text-decoration-none">Contributing</router-link></div>
+            <div><router-link to="/features" class="text-primary text-decoration-none">Features</router-link></div>
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
+            <div class="text-subtitle-2 mb-2">Community</div>
+            <div><a href="https://github.com/WebFiori/framework" target="_blank" class="text-primary text-decoration-none"><v-icon size="small" class="mr-1">mdi-github</v-icon>GitHub</a></div>
+            <div><a href="https://github.com/WebFiori/framework/discussions" target="_blank" class="text-primary text-decoration-none"><v-icon size="small" class="mr-1">mdi-forum</v-icon>Discussions</a></div>
+            <div><a href="https://packagist.org/packages/webfiori/framework" target="_blank" class="text-primary text-decoration-none"><v-icon size="small" class="mr-1">mdi-package-variant-closed</v-icon>Packagist</a></div>
+          </v-col>
+          <v-col cols="12" md="3">
             <div class="text-subtitle-2 mb-2">License</div>
             <div class="text-body-2 text-medium-emphasis">MIT License</div>
           </v-col>
         </v-row>
         <v-divider class="my-4" />
         <div class="text-center text-body-2 text-medium-emphasis">&copy; {{ new Date().getFullYear() }} WebFiori. All rights reserved.</div>
+        <div class="text-center text-body-2 font-italic font-weight-medium mt-1" style="letter-spacing: 0.5px;">🇸🇦 A Saudi Vision, Written in Code.</div>
       </v-container>
     </v-footer>
   </v-app>
