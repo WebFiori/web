@@ -6,9 +6,11 @@ import Documentation from './pages/Documentation.vue'
 import DocViewer from './pages/DocViewer.vue'
 import Libraries from './pages/Libraries.vue'
 import Contributing from './pages/Contributing.vue'
+import V3Release from './pages/V3Release.vue'
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/v3', component: V3Release },
   { path: '/features', component: Features },
   { path: '/getting-started', component: GettingStarted },
   { path: '/docs', component: Documentation },
