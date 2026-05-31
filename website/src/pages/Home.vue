@@ -8,41 +8,59 @@ import ShimmerBorder from '../components/magic/ShimmerBorder.vue'
 import DotGrid from '../components/magic/DotGrid.vue'
 
 const features = [
-  { icon: 'mdi-routes', title: 'Routing', desc: 'Flexible URL routing that can target static files, PHP classes, closures, or MVC controllers.' },
-  { icon: 'mdi-api', title: 'Web Services', desc: 'Build RESTful APIs with built-in JSON handling, data filtering, and validation.' },
-  { icon: 'mdi-database', title: 'Database', desc: 'Schema and query building for MySQL and MSSQL with an intuitive abstraction layer.' },
-  { icon: 'mdi-palette', title: 'Theming', desc: 'Swap the entire UI by changing one line of code. Themes work as modular plug-ins.' },
-  { icon: 'mdi-email', title: 'Email', desc: 'Send HTML emails with attachments using familiar HTML syntax and SMTP configuration.' },
-  { icon: 'mdi-console', title: 'CLI', desc: 'Built-in and custom CLI commands to streamline development workflows.' },
+  { icon: 'mdi-api', title: 'REST APIs', desc: 'Build APIs with PHP 8 attributes — #[RestController], #[GetMapping], #[RequestParam], #[ResponseBody].' },
+  { icon: 'mdi-shield-lock', title: 'Security', desc: 'RBAC, ABAC policies, #[PreAuthorize] expressions, session encryption, rate limiting, CSRF, CORS.' },
+  { icon: 'mdi-tray-full', title: 'Job Queue', desc: 'Background processing with priority, retry, delayed execution, and payload encryption.' },
+  { icon: 'mdi-database', title: 'Database', desc: 'Query builder for MySQL, MSSQL, SQLite with migrations, seeders, and repositories.' },
+  { icon: 'mdi-needle', title: 'DI Container', desc: 'Bind interfaces to implementations with auto-resolution of constructor dependencies.' },
+  { icon: 'mdi-broadcast', title: 'Events', desc: 'Decouple components with event dispatching and listeners for clean architecture.' },
 ]
 
 const codeExamples = [
-  { label: 'Route', lang: 'php', code: `Router::page([
-    RouteOption::PATH => '/products/{category}',
-    RouteOption::TO => ProductsPage::class
-]);` },
-  { label: 'API', lang: 'php', code: `Router::addRoute([
-    RouteOption::PATH => '/api/users/{id}',
-    RouteOption::TO => UserController::class,
-    RouteOption::ACTION => 'getUser',
-    RouteOption::REQUEST_METHODS => ['GET']
-]);` },
-  { label: 'Email', lang: 'php', code: `$message = new EmailMessage('no-reply');
-$message->setSubject('Welcome!');
-$message->addTo('user@example.com');
-$message->insert('p')->text('Hello!');
-$message->send();` },
-  { label: 'CLI', lang: 'php', code: `class MyCommand extends CLICommand {
-    public function __construct() {
-        parent::__construct('greet', [
-            'name' => ['optional' => true]
-        ]);
-    }
-    public function exec(): int {
-        $this->println('Hello %s!', $this->getArgValue('name'));
-        return 0;
+  { label: 'API', lang: 'php', code: `#[RestController('tasks', 'Task API')]
+class TaskService extends WebService {
+    #[GetMapping]
+    #[ResponseBody]
+    #[AllowAnonymous]
+    #[RequestParam(name: 'id', type: ParamType::INT, optional: true)]
+    public function getTasks(?int \$id = null): array {
+        return \$this->repo->findAll();
     }
 }` },
+  { label: 'Security', lang: 'php', code: `#[RequiresAuth]
+#[PreAuthorize("hasAuthority('orders.ship')")]
+public function shipOrder(?int \$id = null): array {
+    \$order = \$this->repo->findById(\$id);
+
+    if (!Access::can(\$user, 'orders.ship', \$order)) {
+        throw new ForbiddenException('Denied.');
+    }
+
+    \$order->status = 'shipped';
+    \$this->repo->save(\$order);
+    return [\$order];
+}` },
+  { label: 'Queue', lang: 'php', code: `class ProcessPaymentJob implements Job {
+    public function getMaxAttempts(): int { return 3; }
+    public function getRetryDelaySeconds(): int { return 30; }
+
+    public function handle(): void {
+        \$gateway = ContainerFacade::make(PaymentGatewayInterface::class);
+        \$result = \$gateway->charge(\$this->amount);
+    }
+}
+
+QueueFacade::dispatch(new ProcessPaymentJob(\$orderId, 99.99), priority: 10);` },
+  { label: 'Events', lang: 'php', code: `// Register
+EventDispatcherFacade::listen(
+    OrderPlacedEvent::class,
+    new SendConfirmationListener()
+);
+
+// Dispatch
+EventDispatcherFacade::dispatch(
+    new OrderPlacedEvent(\$order, \$items)
+);` },
 ]
 
 const activeTab = ref(0)
@@ -68,7 +86,7 @@ const typingDone = ref(false)
             </span>
           </h1>
           <p class="text-h6 text-medium-emphasis mx-auto" style="max-width: 700px">
-            A lightweight, flexible PHP framework for building web applications and APIs. Object-oriented, developer-friendly, and ready for production.
+            A lightweight, flexible PHP framework for building web applications and APIs. Object-oriented, enterprise-ready, and built for PHP 8.1+.
           </p>
           <div class="mt-8">
             <v-btn color="primary" size="large" to="/getting-started" class="mr-3" prepend-icon="mdi-rocket-launch">Get Started</v-btn>
