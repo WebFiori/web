@@ -122,16 +122,20 @@ const architecture = [
 ]
 
 const ecosystem = [
-  { name: 'HTTP', desc: 'Request/response, web services, annotations, security context', repo: 'WebFiori/http' },
-  { name: 'Database', desc: 'Query builder, schema, migrations, repositories', repo: 'WebFiori/database' },
+  { name: 'HTTP', desc: 'Request/response, web services, annotations, security context, content negotiation', repo: 'WebFiori/http' },
+  { name: 'Database', desc: 'Query builder, schema, migrations, repositories, eager loading, connection pooling', repo: 'WebFiori/database' },
+  { name: 'File', desc: 'File I/O, streaming, uploads (multipart, streaming, resumable), serving', repo: 'WebFiori/file' },
   { name: 'Cache', desc: 'Key-value store with TTL, file and Redis backends', repo: 'WebFiori/cache' },
-  { name: 'Queue', desc: 'Job dispatching, retry, encryption, pluggable storage', repo: 'WebFiori/queue' },
+  { name: 'Queue', desc: 'Job dispatching, retry, priority, encryption, pluggable storage', repo: 'WebFiori/queue' },
   { name: 'Event', desc: 'Event dispatcher with class and callable listeners', repo: 'WebFiori/event' },
   { name: 'Container', desc: 'DI with bind, singleton, auto-resolution', repo: 'WebFiori/container' },
-  { name: 'CLI', desc: 'Command framework with arguments, formatting, colors', repo: 'WebFiori/cli' },
-  { name: 'Mail', desc: 'SMTP email with HTML body and attachments', repo: 'WebFiori/mail' },
-  { name: 'UI', desc: 'Programmatic DOM manipulation in PHP', repo: 'WebFiori/ui' },
+  { name: 'CLI', desc: 'Commands, arguments, progress bars, tables, signals, attributes', repo: 'WebFiori/cli' },
+  { name: 'Mail', desc: 'Email with HTML body, attachments, and pluggable transports', repo: 'WebFiori/mail' },
+  { name: 'UI', desc: 'Programmatic DOM, templates, stateless renderer', repo: 'WebFiori/ui' },
+  { name: 'JSON', desc: 'Serialization, deserialization, attributes, JSONx', repo: 'WebFiori/json' },
   { name: 'Log', desc: 'Structured file logging with daily rotation', repo: 'WebFiori/log' },
+  { name: 'Access', desc: 'RBAC, ABAC, role/permission management, policies', repo: 'WebFiori/access' },
+  { name: 'Collections', desc: 'Stack, queue, linked list data structures', repo: 'WebFiori/collections' },
 ]
 </script>
 
