@@ -177,7 +177,7 @@ const navItems = [
         </v-row>
         <v-divider class="my-4" />
         <div class="text-center text-body-2 text-medium-emphasis">&copy; {{ new Date().getFullYear() }} WebFiori. All rights reserved.</div>
-        <div class="text-center text-body-2 font-italic font-weight-medium mt-1" style="letter-spacing: 0.5px;">🇸🇦 A Saudi Vision, Written in Code.</div>
+        <div class="text-center text-body-2 font-italic font-weight-medium mt-1" style="letter-spacing: 0.5px;">Engineered for simplicity. Built to scale.</div>
       </v-container>
     </v-footer>
   </v-app>
