@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   repository_dispatch:
-    types: [docs-updated]
+    types: [docs-updated, blog-updated]
   workflow_dispatch:
 
 permissions:
@@ -25,6 +25,12 @@ jobs:
 
       - name: Clone docs
         run: git clone https://github.com/WebFiori/docs.git website/docs-content
+
+      - name: Clone blog posts
+        run: |
+          git clone https://x-access-token:${{ secrets.REPO_ACCESS_TOKEN }}@github.com/WebFiori/blog.git /tmp/blog
+          mkdir -p website/blog-content
+          cp /tmp/blog/posts/* website/blog-content/
 
       - name: Install and build website
         working-directory: website
