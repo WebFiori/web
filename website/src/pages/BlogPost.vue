@@ -11,9 +11,11 @@ import posts from 'virtual:blog'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const isPreview = computed(() => route.query.preview === 'true')
 const post = computed(() => {
   const p = posts[slug.value]
   if (!p) return undefined
+  if (isPreview.value) return p
   const today = new Date().toISOString().slice(0, 10)
   return p.date <= today ? p : undefined
 })
