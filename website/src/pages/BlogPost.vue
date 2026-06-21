@@ -11,7 +11,12 @@ import posts from 'virtual:blog'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
-const post = computed(() => posts[slug.value])
+const post = computed(() => {
+  const p = posts[slug.value]
+  if (!p) return undefined
+  const today = new Date().toISOString().slice(0, 10)
+  return p.date <= today ? p : undefined
+})
 const contentEl = ref<any>()
 const activeHeading = ref('')
 const mobileTocOpen = ref(false)

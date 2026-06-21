@@ -17,10 +17,12 @@ const allTags = computed(() => {
   return Array.from(tags).sort()
 })
 
-// Sort posts by date (newest first)
+// Sort posts by date (newest first), exclude future posts
 const sortedPosts = computed(() => {
+  const today = new Date().toISOString().slice(0, 10)
   return Object.entries(posts)
     .map(([slug, post]) => ({ slug, ...post }))
+    .filter(p => p.date <= today)
     .sort((a, b) => b.date.localeCompare(a.date))
 })
 
