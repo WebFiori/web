@@ -97,8 +97,10 @@ export default function blogPlugin(blogDir: string): Plugin {
           toc.push({ id: slugify(m[2]), title: m[2], level: m[1].length })
         }
 
-        const html = md.render(content)
-        const text = content.replace(/^#+\s+/gm, '').replace(/[`*_~\[\]()]/g, '').replace(/\n{2,}/g, '\n').trim()
+        // Strip the first h1 heading (title is rendered by the Vue component from frontmatter)
+        const contentWithoutTitle = content.replace(/^#\s+.+\r?\n+/, '')
+        const html = md.render(contentWithoutTitle)
+        const text = contentWithoutTitle.replace(/^#+\s+/gm, '').replace(/[`*_~\[\]()]/g, '').replace(/\n{2,}/g, '\n').trim()
 
         posts[slug] = {
           title: meta.title || slug,
