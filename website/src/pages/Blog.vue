@@ -8,10 +8,10 @@ const router = useRouter()
 const searchQuery = ref((route.query.q as string) || '')
 const selectedTag = ref((route.query.tag as string) || '')
 
-// Collect all tags
+// Collect tags only from published posts
 const allTags = computed(() => {
   const tags = new Set<string>()
-  for (const post of Object.values(posts)) {
+  for (const post of sortedPosts.value) {
     post.tags.forEach(t => tags.add(t))
   }
   return Array.from(tags).sort()
