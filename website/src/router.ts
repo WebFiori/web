@@ -7,6 +7,8 @@ import DocViewer from './pages/DocViewer.vue'
 import Libraries from './pages/Libraries.vue'
 import Contributing from './pages/Contributing.vue'
 import V3Release from './pages/V3Release.vue'
+import Blog from './pages/Blog.vue'
+import BlogPost from './pages/BlogPost.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -15,6 +17,8 @@ const routes = [
   { path: '/getting-started', component: GettingStarted },
   { path: '/docs', component: Documentation },
   { path: '/docs/:slug', component: DocViewer },
+  { path: '/blog', component: Blog },
+  { path: '/blog/:slug', component: BlogPost },
   { path: '/libraries', component: Libraries },
   { path: '/contributing', component: Contributing },
 ]

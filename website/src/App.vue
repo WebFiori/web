@@ -66,6 +66,7 @@ const navItems = [
   { title: 'Features', to: '/features', icon: 'mdi-star' },
   { title: 'Getting Started', to: '/getting-started', icon: 'mdi-rocket-launch' },
   { title: 'Documentation', to: '/docs', icon: 'mdi-book-open-variant' },
+  { title: 'Blog', to: '/blog', icon: 'mdi-post' },
   { title: 'Libraries', to: '/libraries', icon: 'mdi-package-variant-closed' },
   { title: 'Contributing', to: '/contributing', icon: 'mdi-handshake' },
 ]
