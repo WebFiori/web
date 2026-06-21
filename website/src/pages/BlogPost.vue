@@ -25,11 +25,15 @@ const sortedSlugs = computed(() =>
 const currentIndex = computed(() => sortedSlugs.value.indexOf(slug.value))
 const prevPost = computed(() => {
   const i = currentIndex.value
-  return i < sortedSlugs.value.length - 1 ? { slug: sortedSlugs.value[i + 1], title: posts[sortedSlugs.value[i + 1]].title } : null
+  const s = sortedSlugs.value[i + 1]
+  const p = s ? posts[s] : undefined
+  return p ? { slug: s!, title: p.title } : null
 })
 const nextPost = computed(() => {
   const i = currentIndex.value
-  return i > 0 ? { slug: sortedSlugs.value[i - 1], title: posts[sortedSlugs.value[i - 1]].title } : null
+  const s = sortedSlugs.value[i - 1]
+  const p = s ? posts[s] : undefined
+  return p ? { slug: s!, title: p.title } : null
 })
 
 function formatDate(date: string): string {
