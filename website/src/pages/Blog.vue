@@ -19,8 +19,8 @@ const allTags = computed(() => {
 
 // Sort posts by date (newest first), exclude future posts
 const sortedPosts = computed(() => {
-  const now = new Date()
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  const now = new Date(Date.now() + 3 * 60 * 60 * 1000)
+  const today = now.toISOString().slice(0, 10)
   return Object.entries(posts)
     .map(([slug, post]) => ({ slug, ...post }))
     .filter(p => p.date <= today)
