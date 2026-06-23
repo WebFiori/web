@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useTheme } from 'vuetify'
 import { useRoute, useRouter } from 'vue-router'
 import docs from 'virtual:docs'
+import CookieConsent from './components/CookieConsent.vue'
 
 const theme = useTheme()
 const route = useRoute()
@@ -181,6 +182,7 @@ const navItems = [
         <div class="text-center text-body-2 font-italic font-weight-medium mt-1" style="letter-spacing: 0.5px;">Engineered for simplicity. Built to scale.</div>
       </v-container>
     </v-footer>
+    <CookieConsent />
   </v-app>
 </template>
 
