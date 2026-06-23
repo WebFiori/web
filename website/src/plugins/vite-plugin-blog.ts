@@ -98,7 +98,7 @@ export default function blogPlugin(blogDir: string): Plugin {
         }
 
         // Strip the first h1 heading (title is rendered by the Vue component from frontmatter)
-        const contentWithoutTitle = content.replace(/^#\s+.+\r?\n+/, '')
+        const contentWithoutTitle = content.replace(/^\s*#\s+.+\r?\n+/, '')
         const html = md.render(contentWithoutTitle)
         const text = contentWithoutTitle.replace(/^#+\s+/gm, '').replace(/[`*_~\[\]()]/g, '').replace(/\n{2,}/g, '\n').trim()
 
