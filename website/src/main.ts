@@ -36,4 +36,12 @@ const vuetify = createVuetify({
   },
 })
 
+// Track SPA route changes in Google Analytics
+router.afterEach((to) => {
+  window.gtag?.('event', 'page_view', {
+    page_path: to.fullPath,
+    page_title: document.title,
+  })
+})
+
 createApp(App).use(vuetify).use(router).mount('#app')
