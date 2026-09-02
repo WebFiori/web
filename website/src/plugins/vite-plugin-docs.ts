@@ -9,6 +9,84 @@ const RESOLVED_ID = '\0' + VIRTUAL_ID
 
 interface TocEntry { id: string; title: string; level: number }
 
+interface NavItem { title: string; slug: string; description: string }
+interface NavGroup { category: string; description: string; icon: string; items: NavItem[] }
+
+// Default MDI icon per known group heading. Unlisted groups fall back to a generic icon.
+const GROUP_ICONS: Record<string, string> = {
+  'Getting Started': 'mdi-rocket-launch',
+  'Core Features': 'mdi-cube-outline',
+  'User Interface': 'mdi-palette',
+  'Data & Storage': 'mdi-database',
+  'File Handling': 'mdi-file-multiple',
+  'Advanced Topics': 'mdi-sitemap',
+  'Infrastructure': 'mdi-server',
+  'Configuration': 'mdi-cog',
+  'AI (Add-on Library)': 'mdi-robot',
+}
+
+// Groups in index.md that are not documentation categories and should be skipped.
+const SKIP_GROUPS = new Set(['Quick Links'])
+
+/**
+ * Parses the docs index.md into an ordered navigation model.
+ *
+ * Recognizes:
+ *   - `## Group Heading`                         -> a nav group
+ *   - an optional plain paragraph after a heading -> the group description
+ *   - `* [Title](learn/<slug>) - description`     -> a nav item in the group
+ *
+ * This makes index.md the single source of truth for docs navigation, so
+ * adding a page requires no website code changes.
+ */
+function parseNav(indexPath: string): NavGroup[] {
+  if (!fs.existsSync(indexPath)) return []
+
+  const raw = fs.readFileSync(indexPath, 'utf-8')
+  const lines = raw.split(/\r?\n/)
+  const groups: NavGroup[] = []
+  let current: NavGroup | null = null
+
+  const itemRe = /^\*\s+\[([^\]]+)\]\(\s*(?:learn\/)?([a-z0-9-]+)\s*\)\s*(?:-\s*(.*))?$/i
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.+?)\s*$/)
+    if (headingMatch) {
+      const category = headingMatch[1].trim()
+      if (SKIP_GROUPS.has(category)) { current = null; continue }
+      current = {
+        category,
+        description: '',
+        icon: GROUP_ICONS[category] ?? 'mdi-book-open-variant',
+        items: [],
+      }
+      groups.push(current)
+      continue
+    }
+
+    if (!current) continue
+
+    const itemMatch = line.match(itemRe)
+    if (itemMatch) {
+      current.items.push({
+        title: itemMatch[1].trim(),
+        slug: itemMatch[2].trim(),
+        description: (itemMatch[3] ?? '').trim(),
+      })
+      continue
+    }
+
+    // First non-empty, non-list line under a heading becomes the group description.
+    const trimmed = line.trim()
+    if (trimmed !== '' && !trimmed.startsWith('*') && current.description === '' && current.items.length === 0) {
+      current.description = trimmed
+    }
+  }
+
+  // Drop groups that ended up with no items (e.g. prose-only sections).
+  return groups.filter(g => g.items.length > 0)
+}
+
 function slugify(text: string): string {
   return text.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
 }
@@ -93,7 +171,12 @@ export default function docsPlugin(docsDir: string): Plugin {
         docs[slug] = { title, description, html, toc, text, lastUpdated }
       }
 
-      return `export default ${JSON.stringify(docs)}`
+      const nav = parseNav(path.join(resolved, 'index.md'))
+
+      return [
+        `export default ${JSON.stringify(docs)}`,
+        `export const nav = ${JSON.stringify(nav)}`,
+      ].join('\n')
     },
   }
 }

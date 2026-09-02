@@ -7,7 +7,7 @@ import 'prismjs/components/prism-markup-templating'
 import 'prismjs/components/prism-bash'
 import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-php'
-import docs from 'virtual:docs'
+import docs, { nav } from 'virtual:docs'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -16,21 +16,13 @@ const contentEl = ref<any>()
 const activeHeading = ref('')
 const mobileTocOpen = ref(false)
 
-// #1 — Grouped sidebar
-const sidebarGroups = [
-  { category: 'Getting Started', slugs: ['introduction', 'installation', 'folder-structure', 'basic-usage'] },
-  { category: 'Core Features', slugs: ['routing', 'class-response', 'web-pages', 'web-services', 'middleware'] },
-  { category: 'User Interface', slugs: ['ui-package', 'themes', 'i18n'] },
-  { category: 'Data & Storage', slugs: ['database', 'migrations', 'sessions-management', 'webfiori-json', 'uploading-files'] },
-  { category: 'Advanced', slugs: ['mvc', 'sending-emails', 'background-tasks', 'command-line-interface'] },
-  { category: 'Configuration', slugs: ['env-vars', 'coding-standards'] },
-]
-
+// #1 — Grouped sidebar, derived from the docs index.md nav model so it stays
+// in sync with the documentation index automatically.
 const groupedSidebar = computed(() =>
-  sidebarGroups
+  nav
     .map(g => ({
       category: g.category,
-      items: g.slugs.filter(s => docs[s]).map(s => ({ slug: s, title: docs[s]!.title })),
+      items: g.items.filter(i => docs[i.slug]).map(i => ({ slug: i.slug, title: i.title })),
     }))
     .filter(g => g.items.length)
 )

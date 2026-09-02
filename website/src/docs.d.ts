@@ -8,4 +8,13 @@ declare module 'virtual:docs' {
     lastUpdated: string
   }>
   export default docs
+
+  export interface DocsNavItem { title: string; slug: string; description: string }
+  export interface DocsNavGroup {
+    category: string
+    description: string
+    icon: string
+    items: DocsNavItem[]
+  }
+  export const nav: DocsNavGroup[]
 }
